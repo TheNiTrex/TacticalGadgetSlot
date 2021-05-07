@@ -106,8 +106,10 @@ static function bool CanAddItemToInventory_CH_Improved(
 		LocTag = XGParamTag(`XEXPANDCONTEXT.FindTag("XGParam"));
 		LocTag.StrValue0 = "";
 		// Build a custom DisabledReason message using localized strings and the custom slot's GetDisplayNameFn:
-		if (ItemTemplate.DataName == 'GrapplingHook') DisabledReason = default.m_strObsolete @ class'X2StrategyElement_TacticalGadgetSlot'.static.GetDisplayName(CHItemSlot);
-		if (ItemTemplate.DataName == 'GrapplingHookPowered') DisabledReason = default.m_strIncompatible @ class'X2StrategyElement_TacticalGadgetSlot'.static.GetDisplayName(CHItemSlot);
+		DisabledReason = ItemTemplate.DataName == 'GrapplingHook' // If it's not GrapplingHook at this point, it's GrapplingHookPowered
+		? default.m_strObsolete @ class'X2StrategyElement_TacticalGadgetSlot'.static.GetDisplayName(CHItemSlot)
+		: default.m_strIncompatible @ class'X2StrategyElement_TacticalGadgetSlot'.static.GetDisplayName(CHItemSlot);
+
 		bCanAddItem = 0;
 
 		return OverrideNormalBehavior;
