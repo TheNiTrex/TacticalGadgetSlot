@@ -46,7 +46,7 @@ static function bool CanAddItemToSlot(CHItemSlot Slot, XComGameState_Unit UnitSt
 
 	if (!Slot.UnitHasSlot(UnitState, strDummy, CheckGameState) || UnitState.GetItemInSlot(Slot.InvSlot, CheckGameState) != none) {
 		
-		`log(UnitState.GetFullName() @ "cannot add item to" @ Slot.GetDisplayName() @ "Slot:" @ ItemTemplate.FriendlyName @ ItemTemplate.DataName @ ", because unit does not have the" @ Slot.GetDisplayName() @ "Slot:" @ !Slot.UnitHasSlot(UnitState, strDummy, CheckGameState) @ "or" @ "the" @ Slot.GetDisplayName() @ "Slot is already occupied:" @ UnitState.GetItemInSlot(Slot.InvSlot, CheckGameState) != none,default.bTGS_Log,'BetterAlienRulerRewards');
+		`log(UnitState.GetFullName() @ "cannot add item to" @ Slot.GetDisplayName() @ "Slot:" @ ItemTemplate.FriendlyName @ ItemTemplate.DataName @ ", because unit does not have the" @ Slot.GetDisplayName() @ "Slot:" @ !Slot.UnitHasSlot(UnitState, strDummy, CheckGameState) @ "or" @ "the" @ Slot.GetDisplayName() @ "Slot is already occupied:" @ UnitState.GetItemInSlot(Slot.InvSlot, CheckGameState) != none,default.bTGS_Log,'TacticalGadgetSlot');
 
 		return false;
 
@@ -54,7 +54,7 @@ static function bool CanAddItemToSlot(CHItemSlot Slot, XComGameState_Unit UnitSt
 
 	if (ItemTemplate.ItemCat == 'TacticalGadget') {
 
-		`log(UnitState.GetFullName() @ "can add item to" @ Slot.GetDisplayName() @ "Slot:" @ ItemTemplate.FriendlyName @ ItemTemplate.DataName @ ", because it has the matching Item Category:" @ ItemTemplate.ItemCat,default.bTGS_Log,'BetterAlienRulerRewards');
+		`log(UnitState.GetFullName() @ "can add item to" @ Slot.GetDisplayName() @ "Slot:" @ ItemTemplate.FriendlyName @ ItemTemplate.DataName @ ", because it has the matching Item Category:" @ ItemTemplate.ItemCat,default.bTGS_Log,'TacticalGadgetSlot');
 	
 		return true;
 
@@ -72,7 +72,7 @@ static function bool UnitHasSlot(CHItemSlot Slot, XComGameState_Unit UnitState, 
 		// Checks if the Unit State has Armor equipped (Failsafe), and if the Armor is either the Corsair or Wraith Suits
 		if (Armor != none && Armor.GetMyTemplateName() == 'LightPlatedArmor' || Armor.GetMyTemplateName() == 'LightPoweredArmor') {
 
-			`log(UnitState.GetFullName() @ "has" @ Slot.GetDisplayName() @ "Slot because they are wearing:" @ Armor.GetMyTemplateName(),default.bTGS_Log,'BetterAlienRulerRewards');
+			`log(UnitState.GetFullName() @ "has" @ Slot.GetDisplayName() @ "Slot because they are wearing:" @ Armor.GetMyTemplateName(),default.bTGS_Log,'TacticalGadgetSlot');
 			
 			return true; // Add the slot
 
@@ -107,12 +107,12 @@ static function ValidateLoadout(CHItemSlot Slot, XComGameState_Unit UnitState, X
 	Armor = UnitState.GetItemInSlot(eInvSlot_Armor, NewGameState);
 	HasSlot = Slot.UnitHasSlot(UnitState, strDummy, NewGameState);
 
-	`log(UnitState.GetFullName() @ "validating" @ Slot.GetDisplayName() @ "Slot. Unit has slot:" @ HasSlot @ EquippedTacticalGadget == none ? ", slot is empty." : ", slot contains item:" @ EquippedTacticalGadget.GetMyTemplateName(), default.bTGS_Log,'BetterAlienRulerRewards');
+	`log(UnitState.GetFullName() @ "validating" @ Slot.GetDisplayName() @ "Slot. Unit has slot:" @ HasSlot @ EquippedTacticalGadget == none ? ", slot is empty." : ", slot contains item:" @ EquippedTacticalGadget.GetMyTemplateName(), default.bTGS_Log,'TacticalGadgetSlot');
 
 	if ((EquippedTacticalGadget.GetMyTemplateName() == 'GrapplingHook' && Armor.GetMyTemplateName() == 'LightPoweredArmor')
 	|| (EquippedTacticalGadget.GetMyTemplateName() == 'GrapplingHookPowered' && Armor.GetMyTemplateName() == 'LightPlatedArmor')) { // If the Armor and Tactical Gadget configuration is mis-matched, for when the Unit switches between LightPlatedArmor and LightPoweredArmor:
 
-		`log(UnitState.GetFullName() @ "has" @ EquippedTacticalGadget.GetMyTemplateName() @ "equipped on" @ Armor.GetMyTemplateName() @ ". Unequipping the item and putting it into HQ Inventory.", default.bTGS_Log,'BetterAlienRulerRewards');
+		`log(UnitState.GetFullName() @ "has" @ EquippedTacticalGadget.GetMyTemplateName() @ "equipped on" @ Armor.GetMyTemplateName() @ ". Unequipping the item and putting it into HQ Inventory.", default.bTGS_Log,'TacticalGadgetSlot');
 		EquippedTacticalGadget = RemoveGrapplingHook(EquippedTacticalGadget, NewGameState, UnitState, XComHQ);
 
 	}
@@ -122,12 +122,12 @@ static function ValidateLoadout(CHItemSlot Slot, XComGameState_Unit UnitState, X
 		// Get Grappling Hook:
 		EquippedTacticalGadget = GetGrapplingHook(XComHQ, Armor, NewGameState);
 		// Equip Grappling Hook to Unit:
-		`log("Equipping" @ EquippedTacticalGadget.GetMyTemplateName() @ "on" @ UnitState.GetFullName(), default.bTGS_Log, 'BetterAlienRulerRewards');
+		`log("Equipping" @ EquippedTacticalGadget.GetMyTemplateName() @ "on" @ UnitState.GetFullName(), default.bTGS_Log, 'TacticalGadgetSlot');
 		UnitState.AddItemToInventory(EquippedTacticalGadget, eInvSlot_TacticalGadget, NewGameState);
 	
 	} else if(EquippedTacticalGadget != none && !HasSlot) { // If the Unit DOES have a Tactical Gadget Equipped but does NOT have the TacticalGadget slot
 
-		`log(UnitState.GetFullName() @ "has an item equipped in the" @ Slot.GetDisplayName() @ "Slot, but they do not have the" @ Slot.GetDisplayName() @ "Slot. Unequipping the item and putting it into HQ Inventory.", default.bTGS_Log,'BetterAlienRulerRewards');
+		`log(UnitState.GetFullName() @ "has an item equipped in the" @ Slot.GetDisplayName() @ "Slot, but they do not have the" @ Slot.GetDisplayName() @ "Slot. Unequipping the item and putting it into HQ Inventory.", default.bTGS_Log,'TacticalGadgetSlot');
 		EquippedTacticalGadget = RemoveGrapplingHook(EquippedTacticalGadget, NewGameState, UnitState, XComHQ);
 
 	}
@@ -158,7 +158,7 @@ static function XComGameState_Item GetGrapplingHook(XComGameState_HeadquartersXC
 		if ((Armor.GetMyTemplateName() == 'LightPlatedArmor' && ItemState.GetMyTemplateName() == 'GrapplingHook')
 		|| (Armor.GetMyTemplateName() == 'LightPoweredArmor' && ItemState.GetMyTemplateName() == 'GrapplingHookPowered')) {
 			
-			`log(ItemState.GetMyTemplateName() @ "Item found.", default.bTGS_Log,'BetterAlienRulerRewards');
+			`log(ItemState.GetMyTemplateName() @ "Item found.", default.bTGS_Log,'TacticalGadgetSlot');
 			// Create a new Item State in the NewGameState, since the Template is an infinite item:
 			XComHQ.GetItemFromInventory(NewGameState, ItemState.GetReference(), ItemState);
 
