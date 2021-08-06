@@ -3,7 +3,9 @@
   <PropertyGroup>
     <Guid>0c43b897-c165-4774-ac2e-d98275d009b4</Guid>
     <Name>Tactical Gadget Slot</Name>
-    <Description>Adds a Tactical Gadget Slot for Light Armors.</Description>
+    <Description>Adds a Tactical Gadget Slot for Light Armors.
+
+tags= War Of The Chosen</Description>
     <SteamPublishID>0</SteamPublishID>
     <AssemblyName>TacticalGadgetSlot</AssemblyName>
     <RootNamespace>TacticalGadgetSlot</RootNamespace>
