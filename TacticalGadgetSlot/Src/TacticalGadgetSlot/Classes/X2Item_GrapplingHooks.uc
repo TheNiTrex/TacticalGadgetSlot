@@ -12,7 +12,7 @@ static function array<X2DataTemplate> CreateTemplates() {
 
 }
 
-static function X2DataTemplate CreateGrapplingHook() { // Second Grapple Item because there's a separate ability for the Wraith Suit particle effects.
+static function X2DataTemplate CreateGrapplingHook() { 
 
 	local X2WeaponTemplate	Template;
 
@@ -36,7 +36,7 @@ static function X2DataTemplate CreateGrapplingHook() { // Second Grapple Item be
 
 }
 
-static function X2DataTemplate CreateGrapplingHookPowered() { 
+static function X2DataTemplate CreateGrapplingHookPowered() { // Second Grapple Item because there's a separate ability for the Wraith Suit particle effects.
 
 	local X2WeaponTemplate	Template;
 
