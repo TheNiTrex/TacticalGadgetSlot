@@ -18,7 +18,12 @@ var localized string m_strObsolete;
 /// DLC / Mod to perform custom processing in response. This will only be called once the first time a player loads a save that was
 /// create without the content installed. Subsequent saves will record that the content was installed.
 /// </summary>
-static event OnLoadedSavedGame() {}
+static event OnLoadedSavedGame() {
+	
+	// Add Grapple Items when loading an existing save:
+	AddGrappleItems();
+
+}
 
 /// <summary>
 /// Called when the player starts a new campaign while this DLC / Mod is installed
@@ -30,6 +35,77 @@ static event OnPostTemplatesCreated() {
 	// Remove Grapple Ability:
 	RemoveGrappleAbility();
 
+}
+
+// ##########################################
+// ###-ADD-GRAPPLE-ITEMS-TO-EXISTING-SAVE-###
+// ##########################################
+
+static function AddGrappleItems() {
+
+	local XComGameStateHistory History;
+	local XComGameState_HeadquartersXCom XComHQ;
+	local X2ItemTemplateManager TemplateManager; // Create Item Manager to access Grapple Templates
+	local array<name> GrappleTemplateNames;
+	local name GrappleTemplateName;
+	local array<X2ItemTemplate> CheckGrappleTemplates , AddGrappleTemplates;
+	local X2ItemTemplate CheckGrappleTemplate, AddGrappleTemplate;
+	local XComGameState NewGameState;
+	local XComGameState_Item NewItemState;
+
+	History = `XCOMHISTORY;
+
+	// Access Item Template Manager:
+	TemplateManager = class'X2ItemTemplateManager'.static.GetItemTemplateManager(); 
+
+	// Add Grapple Template Names to list:
+	GrappleTemplateNames.AddItem('GrapplingHook');
+	GrappleTemplateNames.AddItem('GrapplingHookPowered');
+
+	// Check if XComHQ has the Grapples, just in-case:
+	foreach GrappleTemplateNames(GrappleTemplateName) {
+
+		CheckGrappleTemplates.AddItem(TemplateManager.FindItemTemplate(GrappleTemplateName));
+
+	}
+
+	foreach CheckGrappleTemplates(CheckGrappleTemplate) {
+
+		if (!XComHQ.HasItem(CheckGrappleTemplate)) {
+		
+			AddGrappleTemplates.AddItem(CheckGrappleTemplate);
+		
+		}
+	}
+
+	// If any Grapples are not present, add them:
+	if (AddGrappleTemplates.length > 0) {
+
+		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Tactical Gadget Slot: Updating HQ Storage");
+
+		XComHQ = XComGameState_HeadquartersXCom(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersXCom'));
+		XComHQ = XComGameState_HeadquartersXCom(NewGameState.ModifyStateObject(class'XComGameState_HeadquartersXCom', XComHQ.ObjectID));
+
+		NewGameState.AddStateObject(XComHQ);
+
+		foreach AddGrappleTemplates(AddGrappleTemplate) {
+
+			NewItemState = AddGrappleTemplate.CreateInstanceFromTemplate(NewGameState);
+			NewGameState.AddStateObject(NewItemState);
+			XComHQ.AddItemToHQInventory(NewItemState);
+
+		}
+
+		if (NewGameState.GetNumGameStateObjects() > 1) { // Submit the New Game State if we have added any State Objects to it, other than XCOM HQ itself
+
+       		History.AddGameStateToHistory(NewGameState);
+
+   		} else { // Otherwise, clean it up. Should never trigger in this case, but just good practice
+        
+       		History.CleanupPendingGameState(NewGameState);
+    
+		}
+	}  
 }
 
 // ################################################
@@ -46,14 +122,14 @@ static function RemoveGrappleAbility() { // OPTC to get the template of it X2Arm
 	// Access Item Template Manager:
 	TemplateManager = class'X2ItemTemplateManager'.static.GetItemTemplateManager(); 
 
-	// Add Weapon Template Names to list:
+	// Add Armor Template Names to list:
 	ArmorTemplateNames.AddItem('LightPlatedArmor');
 	ArmorTemplateNames.AddItem('LightPoweredArmor');
 	
 	// Iterate through list:
 	foreach ArmorTemplateNames(ArmorTemplateName) {
 		
-		// Modify Weapon Template:
+		// Modify Armor Template:
 		ArmorTemplate = X2ArmorTemplate(TemplateManager.FindItemTemplate(ArmorTemplateName));
 		if (ArmorTemplateName == 'LightPlatedArmor') ArmorTemplate.Abilities.RemoveItem('Grapple');
 		if (ArmorTemplateName == 'LightPoweredArmor') ArmorTemplate.Abilities.RemoveItem('GrapplePowered');
@@ -87,10 +163,17 @@ static function bool CanAddItemToInventory_CH_Improved(
     OverrideNormalBehavior = CheckGameState != none;
     DoNotOverrideNormalBehavior = CheckGameState == none;
 
+	// Duplicate items in slot bug fix, prevent item from being added into occupied slot:
+	if (Slot == eInvSlot_TacticalGadget && CheckGameState != none && UnitState.GetItemInSlot(eInvSlot_TacticalGadget , CheckGameState) != none) {
+
+		return DoNotOverrideNormalBehavior;
+
+	}
+
     // If there already is a Disabled Reason, it means another mod has already disallowed equipping this item.
     // In this case, we do not interfere with that mod's functions for better compatibility:
-    if (DisabledReason != "") 
-	{
+    if (DisabledReason != "") {
+
         return DoNotOverrideNormalBehavior;
 
 	}
